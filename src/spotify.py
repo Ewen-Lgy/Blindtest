@@ -8,7 +8,6 @@ import os
 from dotenv import load_dotenv
 
 def search_playlists_by_keyword(client, keywords):
-
     exclude_keywords = [
         'serie',
         'films',
@@ -17,79 +16,81 @@ def search_playlists_by_keyword(client, keywords):
         'culte',
         'cinema']
 
-    # Recherche de playlists par mot-clé
+    # Search for playlists by keyword
     playlists = client.search(q=keywords, type='playlist', limit=10)
-    filterd_playlists = []
+    filtered_playlists = []
 
     if playlists['playlists']['items']:
-        print(f"Playlists avec le mot-clé '{keywords}':")
         for playlist in playlists['playlists']['items']:
             playlist_name = playlist['name']
-            # Vérifiez si la playlist contient des mots-clés à exclure
+            # Check if the playlist contains excluded keywords
             if all(exclude_keyword.lower() not in playlist_name.lower() for exclude_keyword in exclude_keywords):
-                filterd_playlists.append(playlist)
+                filtered_playlists.append(playlist)
     else:
         return []
-    return random.choice(filterd_playlists)
+    return random.choice(filtered_playlists)
 
-# We can get the popularity of the tracks, popularity is based on a scale from 0 to 100.
+# We can get the popularity of the tracks; popularity is based on a scale from 0 to 100.
 # 0 ==> Lowest popularity
 # 100 ==> highest popularity
 
-# What do we want precisely, is a mix of popular and less popular songs
-# But since it's a blindtest and is made for fun,
+# What we want precisely is a mix of popular and less popular songs,
+# but since it's a blind test and is made for fun,
 # we would choose an average value above 50, something like 60.
-# We want around 20 songs for a nice blindtest
-
+# We want around 20 songs for a nice blind test
 
 def get_n_top_songs(songs, num_elements):
     """
-    This method sort a list of song by their popularity. returns the top n best popular songs from the list
+    This method sorts a list of songs by their popularity and returns the top n best popular songs from the list.
 
     Parameters:
         songs: List containing songs
-        Parameters: num_elements: Number of elements to return
+        num_elements: Number of elements to return
     """
     sorted_songs = sorted(songs, key=itemgetter('popularity'), reverse=True)
 
-    # In case category size is higher than the array length
+    # In case the category size is higher than the array length
     if num_elements > len(sorted_songs):
         return sorted_songs
 
     return sorted_songs[:num_elements]
 
-
 def get_songs_by_category(songs, min_popularity, category_size):
-    # Filtrer les sons en dessous de la popularité minimale
+    """
+    Partitions songs into 3 categories of popularity: low, medium, and high.
+
+    Parameters:
+        songs: List containing songs
+        min_popularity: Minimum popularity (between 0 and 100) to create 3 categories
+        category_size: Number of songs we want in the categories
+    """
+    # Filter songs below the minimum popularity
     filtered_songs = [song for song in songs if song['track']['popularity'] >= min_popularity]
     popularities_array = [song['track']['popularity'] for song in filtered_songs]
 
-    # Calculez le 1er et 2ème quartiles sur les popularités filtrées
+    # Calculate the 1st and 3nd quartiles on the filtered popularities
     q25 = np.percentile(popularities_array, 25)
     q75 = np.percentile(popularities_array, 75)
 
-    # Définissez les seuils pour vos catégories
+    # Set thresholds for your categories
     low_threshold = q25
     high_threshold = q75
 
-    # Divisez les popularités en catégories
+    # Divide popularities into categories
     low_popularities = [song['track'] for song in filtered_songs if song['track']['popularity'] <= low_threshold]
     medium_popularities = [song['track'] for song in filtered_songs if low_threshold < song['track']['popularity'] <= high_threshold]
     high_popularities = [song['track'] for song in filtered_songs if song['track']['popularity'] > high_threshold]
 
-    # Sélectionnez le nombre spécifié de sons pour chaque catégorie
+    # Select the specified number of songs for each category
     selected_low = get_n_top_songs(low_popularities, category_size)
+    # For difficulty purposes, we want to have more medium songs than others
     selected_medium = get_n_top_songs(medium_popularities, category_size * 2)
     selected_high = get_n_top_songs(high_popularities, category_size)
 
     return selected_low + selected_medium + selected_high
 
-
-
-
 def main():
-
-    # Charger les variables d'environnement à partir du fichier .env
+    # Load environment variables from the .env file
     load_dotenv()
 
     CATEGORY_SIZE = int(sys.argv[1])
@@ -97,26 +98,21 @@ def main():
     CLIENT_ID = 'ae0e8df4f008454ba1db538f5ca59d78'
     CLIENT_SECRET = 'f20fb86fc2ae475f8fa6295d9b8633ec'
 
-    # Configurez les informations d'authentification
+    # Configure authentication information
     client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 
     # Get the spotipy client
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-    # Utilisation de la fonction avec exclusion de certains mots-clés
+    # Use the function with exclusion of certain keywords
     playlist = search_playlists_by_keyword(client=sp, keywords='blind test +2000')
-    print(playlist['name'])
 
     # Retrieve the songs of the playlist
     songs = sp.playlist_items(playlist["id"])
-    print(songs['total'])
 
     selected_sounds = get_songs_by_category(songs['items'], MIN_POPULARITY, CATEGORY_SIZE)
-    print(len(selected_sounds))
 
-    print([(sound['name'], sound['popularity']) for sound in selected_sounds])
-
-# Vérifie si le script est exécuté directement (plutôt que d'être importé comme un module)
+# Check if the script is executed directly (rather than being imported as a module)
 if __name__ == "__main__":
-    # Appelle la fonction main si le script est exécuté directement
+    # Call the main function if the script is executed directly
     main()
