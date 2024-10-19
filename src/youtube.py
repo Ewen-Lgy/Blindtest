@@ -4,8 +4,8 @@ import yt_dlp
 
 def getClip(title: str, artist: str, output_directory: str):
     options = {
-        'format': 'bestvideo+bestaudio/best',
-        'outtmpl': f'download_output/{output_directory}/{title} - {artist}.%(ext)s'
+        "format": "bestvideo+bestaudio/best",
+        "outtmpl": f"download_output/{output_directory}/{title} - {artist}.%(ext)s",
     }
 
     with yt_dlp.YoutubeDL(options) as ydl:
