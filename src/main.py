@@ -1,21 +1,29 @@
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-import sys
-from dotenv import load_dotenv
-from youtube import getClip
-from datetime import datetime
-import os
+"""
+Main script to load environment variables and process command-line arguments.
+"""
 
-from spotify import search_playlists_by_keyword, get_songs_by_category
+import os
+import sys
+from datetime import datetime
+
+import spotipy
+from dotenv import load_dotenv
+from spotipy.oauth2 import SpotifyClientCredentials
+
+from spotify import get_songs_by_category, search_playlists_by_keyword
+from youtube import get_clip
 
 
 def main():
+    """
+    Main function
+    """
     # Load environment variables from the .env file
     load_dotenv()
 
-    CATEGORY_SIZE = int(sys.argv[1])
-    MIN_POPULARITY = int(sys.argv[2])
-    KEYWORDS = " ".join(
+    category_size = int(sys.argv[1])
+    min_popularity = int(sys.argv[2])
+    keywords = " ".join(
         sys.argv[3:]
     )  # We allow spaces for keywords (ex : for artists its easier => Ed Sheeran)
 
@@ -28,13 +36,13 @@ def main():
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
     # Use the function with exclusion of certain keywords
-    playlist = search_playlists_by_keyword(client=sp, keywords=f" best {KEYWORDS}")
+    playlist = search_playlists_by_keyword(client=sp, keywords=f" best {keywords}")
 
     # Retrieve the songs of the playlist
     songs = sp.playlist_items(playlist["id"])
 
     selected_songs = get_songs_by_category(
-        songs["items"], MIN_POPULARITY, CATEGORY_SIZE
+        songs["items"], min_popularity, category_size
     )
 
     # Get the clip of each songs selected
@@ -43,7 +51,7 @@ def main():
     for song in selected_songs:
         print(song["name"])
         print(song["artists"])
-        getClip(song["name"], song["artists"][0]["name"], directory)
+        get_clip(song["name"], song["artists"][0]["name"], directory)
 
 
 # Check if the script is executed directly (rather than being imported as a module)

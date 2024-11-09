@@ -1,9 +1,24 @@
+"""
+Module that deals with call of spotify api
+"""
+
 import random
-import numpy as np
 from operator import itemgetter
+
+import numpy as np
 
 
 def search_playlists_by_keyword(client, keywords):
+    """
+    Make a request to find a playlist given a string of keywords. Also, a list of excluded keywords
+    is used to remove playlists with these exluded keywords in its name.
+
+    Parameters:
+        client: Spotify client to make the request to
+        keywords: string of keywords to lookup for in the playlist name
+
+    Returns a random playlist from the sublist of playlist
+    """
     exclude_keywords = ["serie", "films", "disney", "jeux-videos", "culte", "cinema"]
 
     # Search for playlists by keyword
@@ -36,7 +51,8 @@ def search_playlists_by_keyword(client, keywords):
 
 def get_n_top_songs(songs, num_elements):
     """
-    This method sorts a list of songs by their popularity and returns the top n best popular songs from the list.
+    This method sorts a list of songs by their popularity and returns
+    the top n best popular songs from the list.
 
     Parameters:
         songs: List containing songs

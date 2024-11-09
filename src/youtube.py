@@ -1,8 +1,22 @@
+"""
+Module that deals with youtube API
+"""
+
 from __future__ import unicode_literals
+
 import yt_dlp
 
 
-def getClip(title: str, artist: str, output_directory: str):
+def get_clip(title: str, artist: str, output_directory: str):
+    """
+    Retrieve the youtube video clip of the song of an artist
+    and storing it in the specified location.
+
+    Parameters:
+        title: Title of the song
+        artist: Name of the artist
+        output_directory: Path to the location of the video clip
+    """
     options = {
         "format": "bestvideo+bestaudio/best",
         "outtmpl": f"download_output/{output_directory}/{title} - {artist}.%(ext)s",
