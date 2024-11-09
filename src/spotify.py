@@ -8,7 +8,7 @@ from operator import itemgetter
 import numpy as np
 
 
-def search_playlists_by_keyword(client, keywords):
+def search_playlists_by_keyword(client, keywords: str):
     """
     Make a request to find a playlist given a string of keywords. Also, a list of excluded keywords
     is used to remove playlists with these exluded keywords in its name.
