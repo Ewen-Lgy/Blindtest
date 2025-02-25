@@ -49,7 +49,7 @@ def search_playlists_by_keyword(client, keywords: str):
 # We want around 20 songs for a nice blind test
 
 
-def get_n_top_songs(songs, num_elements):
+def get_n_top_songs(songs: list[dict], num_elements: int):
     """
     This method sorts a list of songs by their popularity and returns
     the top n best popular songs from the list.
@@ -67,7 +67,7 @@ def get_n_top_songs(songs, num_elements):
     return sorted_songs[:num_elements]
 
 
-def get_songs_by_category(songs, min_popularity, category_size):
+def get_songs_by_category(songs: list[dict], min_popularity: int, category_size: int):
     """
     Partitions songs into 3 categories of popularity: low, medium, and high.
 
